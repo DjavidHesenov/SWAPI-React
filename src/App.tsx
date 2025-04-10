@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Films from './pages/Film/Films';
@@ -10,13 +15,18 @@ import Starships from './pages/Starships/Starships';
 import StarshipDetails from './pages/Starships/StarshipsDetails';
 import Vehicles from './pages/Vehicles/Vehicles';
 import VehicleDetails from './pages/Vehicles/VehicleDetails';
+import Species from './pages/Species/Species';
+import SpecieDetails from './pages/Species/SpecieDetails';
+import Planets from './pages/Planets/Planets';
+import PlanetDetails from './pages/Planets/PlanetDetails';
 
 function App() {
   return (
     <DataProvider>
       <Router>
-        <Layout>
-          <Routes>
+        <Routes>
+          {/* Main layout wrapper */}
+          <Route element={<Layout />}>
             <Route path="/" element={<Home />} />
             <Route path="/films" element={<Films />} />
             <Route path="/films/:id" element={<FilmDetails />} />
@@ -26,8 +36,13 @@ function App() {
             <Route path="/starships/:id" element={<StarshipDetails />} />
             <Route path="/vehicles" element={<Vehicles />} />
             <Route path="/vehicles/:id" element={<VehicleDetails />} />
-          </Routes>
-        </Layout>
+            <Route path="/species" element={<Species />} />
+            <Route path="/species/:id" element={<SpecieDetails />} />
+            <Route path="/planets" element={<Planets />} />
+            <Route path="/planets/:id" element={<PlanetDetails />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
       </Router>
     </DataProvider>
   );

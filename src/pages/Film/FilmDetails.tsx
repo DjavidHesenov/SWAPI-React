@@ -18,7 +18,7 @@ export default function FilmDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const filmId = Number(id);
-
+  
   const {
     data: film,
     isLoading,
@@ -108,7 +108,8 @@ export default function FilmDetails() {
 
         <button
           onClick={() => navigate(`/films/${filmId + 1}`)}
-          className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700"
+          disabled={filmId >= 6}
+          className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Next →
         </button>

@@ -40,12 +40,6 @@ export default function Vehicles() {
                             to={`/vehicles/${id}`}
                             className="bg-zinc-900/80 rounded-3xl overflow-hidden shadow-xl hover:scale-105 transition-transform"
                         >
-                            <img
-                                src={`https://robohash.org/${vehicle.name}?set=set4&size=300x300`}
-                                alt={vehicle.name}
-                                onError={(e) => (e.currentTarget.src = '/placeholder-vehicle.png')}
-                                className="w-full h-56 object-cover object-center"
-                            />
                             <div className="p-4">
                                 <h2 className="text-xl font-semibold text-yellow-300 mb-2">{vehicle.name}</h2>
                                 <p className="text-sm text-gray-400">Model: {vehicle.model}</p>

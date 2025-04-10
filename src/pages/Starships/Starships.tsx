@@ -38,11 +38,6 @@ export default function Starships() {
                             to={`/starships/${id}`}
                             className="bg-zinc-900/80 p-6 rounded-3xl border border-zinc-700 shadow-xl hover:scale-[1.01] transition"
                         >
-                            <img
-                                src={`https://robohash.org/${ship.name}?set=set3&size=300x300`}
-                                alt={ship.name}
-                                className="w-full h-48 object-cover rounded-xl border border-yellow-500 mb-4"
-                            />
                             <h2 className="text-xl font-bold text-yellow-400 mb-2">{ship.name}</h2>
                             <p className="text-gray-300 text-sm">Model: {ship.model}</p>
                             <p className="text-gray-500 text-sm">Class: {ship.starship_class}</p>

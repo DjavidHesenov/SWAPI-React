@@ -5,7 +5,10 @@ import { useData } from '../context/DataContext';
 
 const cache = new Map<string, ApiResponse<any>>();
 
-export function useInfiniteScroll<T>(initialUrl: string, resourceType: string) {
+// Define allowed resource keys
+export type ResourceType = 'films' | 'people' | 'planets' | 'species' | 'vehicles' | 'starships';
+
+export function useInfiniteScroll<T>(initialUrl: string, resourceType: ResourceType) {
   const { state, dispatch } = useData();
   const [nextUrl, setNextUrl] = useState<string | null>(initialUrl);
   const { ref, inView } = useInView();
@@ -14,15 +17,14 @@ export function useInfiniteScroll<T>(initialUrl: string, resourceType: string) {
   const fetchData = useCallback(async (url: string) => {
     if (cache.has(url)) {
       const cachedData = cache.get(url)!;
-      // Only set data if we don't already have these results
-      const existingUrls = new Set(state.data[resourceType].map(item => item.url));
-      const newResults = cachedData.results.filter(item => !existingUrls.has(item.url));
+      const existingUrls = new Set((state.data[resourceType] || []).map((item: any) => item.url));
+      const newResults = cachedData.results.filter((item: any) => !existingUrls.has(item.url));
 
       if (newResults.length > 0) {
         dispatch({
           type: 'SET_DATA',
           resourceType,
-          data: [...state.data[resourceType], ...newResults]
+          data: [...(state.data[resourceType] || []), ...newResults],
         });
       }
       setNextUrl(cachedData.next);
@@ -37,15 +39,14 @@ export function useInfiniteScroll<T>(initialUrl: string, resourceType: string) {
       const json: ApiResponse<T> = await response.json();
       cache.set(url, json);
 
-      // Only add new items that don't already exist in the state
-      const existingUrls = new Set(state.data[resourceType].map(item => item.url));
-      const newResults = json.results.filter(item => !existingUrls.has(item.url));
+      const existingUrls = new Set((state.data[resourceType] || []).map((item: any) => item.url));
+      const newResults = json.results.filter((item: any) => !existingUrls.has(item.url));
 
       if (newResults.length > 0) {
         dispatch({
           type: 'SET_DATA',
           resourceType,
-          data: [...state.data[resourceType], ...newResults]
+          data: [...(state.data[resourceType] || []), ...newResults],
         });
       }
       setNextUrl(json.next);
@@ -57,13 +58,22 @@ export function useInfiniteScroll<T>(initialUrl: string, resourceType: string) {
   }, [dispatch, resourceType, state.data]);
 
   useEffect(() => {
-    // Only fetch if we don't have any data yet or if we're scrolling and there's more to load
-    if (!nextUrl || state.loading[resourceType] || !inView) return;
-    if (state.data[resourceType].length === 0 || inView) {
+    if (!nextUrl || state.loading[resourceType]) return;
+  
+    const hasData = (state.data[resourceType] || []).length > 0;
+  
+    // Fetch immediately on first load
+    if (!hasData) {
+      fetchData(nextUrl);
+      return;
+    }
+  
+    // Fetch more if the scroll target is in view
+    if (inView) {
       fetchData(nextUrl);
     }
   }, [inView, nextUrl, state.loading, fetchData, resourceType, state.data]);
-
+  
   const reset = useCallback(() => {
     dispatch({ type: 'SET_DATA', resourceType, data: [] });
     setNextUrl(initialUrl);
@@ -71,11 +81,11 @@ export function useInfiniteScroll<T>(initialUrl: string, resourceType: string) {
   }, [dispatch, initialUrl, resourceType]);
 
   return {
-    data: state.data[resourceType] || [],
+    data: state.data[resourceType] as T[] || [],
     isLoading: state.loading[resourceType] || false,
     error,
     ref,
     reset,
-    hasMore: !!nextUrl
+    hasMore: !!nextUrl,
   };
 }

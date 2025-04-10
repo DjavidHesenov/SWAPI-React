@@ -3,12 +3,23 @@ import { useCachedFetch } from '../../hooks/useCachedFetch';
 import { Person } from '../../types/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorMessage from '../../components/ErrorMessage';
+import { useData } from '../../context/DataContext';
 
 export default function PeopleDetails() {
   const { id } = useParams<{ id: string }>();
+  const { state } = useData();
   const navigate = useNavigate();
   const personId = Number(id);
   const { data: person, isLoading, error, refetch } = useCachedFetch<Person>(`https://swapi.dev/api/people/${id}/`);
+
+  // ✅ Get all valid person IDs from context
+  const allIds = (state.data.people || [])
+    .map(p => parseInt(p.url.split('/').filter(Boolean).pop() || '0'))
+    .filter(n => !isNaN(n));
+  const sortedIds = allIds.sort((a, b) => a - b);
+  const personIndex = sortedIds.indexOf(personId);
+  const nextId = sortedIds[personIndex + 1];
+  const prevId = sortedIds[personIndex - 1];
 
   if (error) return <ErrorMessage message={"Not Found."} onRetry={refetch} />;
   if (isLoading || !person) return <LoadingSpinner />;
@@ -41,21 +52,21 @@ export default function PeopleDetails() {
           </div>
         </div>
       </div>
-      
 
       {/* --- Navigation Buttons --- */}
       <div className="flex justify-center gap-10 items-center text-yellow-400 text-lg p-8">
         <button
-          onClick={() => navigate(`/people/${personId - 1}`)}
-          disabled={personId <= 1}
-          className={`px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed`}
+          onClick={() => navigate(`/people/${prevId}`)}
+          disabled={prevId === undefined}
+          className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           ← Previous
         </button>
 
         <button
-          onClick={() => navigate(`/people/${personId + 1}`)}
-          className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700"
+          onClick={() => navigate(`/people/${nextId}`)}
+          disabled={nextId === undefined}
+          className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Next →
         </button>
